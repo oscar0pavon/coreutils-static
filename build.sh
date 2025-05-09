@@ -11,23 +11,25 @@ musl_version="1.2.5"
 platform=$(uname -s)
 
 if [ -d build ]; then
-  echo "= removing previous build directory"
-  rm -rf build
+  if ![ -f coreutils-${coreutils_version}.tar.xz ]; then
+    # download tarballs
+    echo "= downloading coreutils"
+    curl -LO http://ftp.gnu.org/gnu/coreutils/coreutils-${coreutils_version}.tar.xz
+  fi
+else
+  mkdir build # make build directory
 fi
 
-mkdir build # make build directory
 pushd build
-
-# download tarballs
-echo "= downloading coreutils"
-curl -LO http://ftp.gnu.org/gnu/coreutils/coreutils-${coreutils_version}.tar.xz
 
 echo "= extracting coreutils"
 tar xvJf coreutils-${coreutils_version}.tar.xz
 
 if [ "$platform" = "Linux" ]; then
-  echo "= downloading musl"
-  curl -LO http://www.musl-libc.org/releases/musl-${musl_version}.tar.gz
+  if ![ -f musl-${musl_version}.tar.gz ]; then
+    echo "= downloading musl"
+    curl -LO http://www.musl-libc.org/releases/musl-${musl_version}.tar.gz
+  fi
 
   echo "= extracting musl"
   tar -xvf musl-${musl_version}.tar.gz
