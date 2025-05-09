@@ -5,8 +5,8 @@
 #
 # For Linux, also builds musl for truly static linking.
 
-coreutils_version="8.28"
-musl_version="1.1.15"
+coreutils_version="9.7"
+musl_version="1.2.5"
 
 platform=$(uname -s)
 
@@ -23,14 +23,14 @@ echo "= downloading coreutils"
 curl -LO http://ftp.gnu.org/gnu/coreutils/coreutils-${coreutils_version}.tar.xz
 
 echo "= extracting coreutils"
-tar xJf coreutils-${coreutils_version}.tar.xz
+tar xvJf coreutils-${coreutils_version}.tar.xz
 
 if [ "$platform" = "Linux" ]; then
   echo "= downloading musl"
   curl -LO http://www.musl-libc.org/releases/musl-${musl_version}.tar.gz
 
   echo "= extracting musl"
-  tar -xf musl-${musl_version}.tar.gz
+  tar -xvf musl-${musl_version}.tar.gz
 
   echo "= building musl"
   working_dir=$(pwd)
@@ -39,7 +39,7 @@ if [ "$platform" = "Linux" ]; then
 
   pushd musl-${musl_version}
   env CFLAGS="$CFLAGS -Os -ffunction-sections -fdata-sections" LDFLAGS='-Wl,--gc-sections' ./configure --prefix=${install_dir}
-  make install
+  make -j32 install
   popd # musl-${musl-version}
 
   echo "= setting CC to musl-gcc"
@@ -54,7 +54,7 @@ echo "= building coreutils"
 
 pushd coreutils-${coreutils_version}
 env FORCE_UNSAFE_CONFIGURE=1 CFLAGS="$CFLAGS -Os -ffunction-sections -fdata-sections" LDFLAGS='-Wl,--gc-sections' ./configure
-make
+make -j32
 popd # coreutils-${coreutils_version}
 
 popd # build
